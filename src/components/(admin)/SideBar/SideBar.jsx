@@ -42,24 +42,24 @@ const SideBar = () => {
                 { title: "Cancelled Bookings", href: "/admin/bookings/cancelled" },
             ],
         },
-        {
-            title: "Users",
-            icon: Users,
-            children: [
-                { title: "All Users", href: "/admin/users" },
-                { title: "Create User", href: "/admin/users/create" },
-            ],
-        },
-        {
-            title: "Profile",
-            href: "/admin/profile",
-            icon: UserCircle,
-        },
-        {
-            title: "Logout",
-            href: "/admin/logout",
-            icon: LogOut,
-        },
+        // {
+        //     title: "Users",
+        //     icon: Users,
+        //     children: [
+        //         { title: "All Users", href: "/admin/users" },
+        //         { title: "Create User", href: "/admin/users/create" },
+        //     ],
+        // },
+        // {
+        //     title: "Profile",
+        //     href: "/admin/profile",
+        //     icon: UserCircle,
+        // },
+        // {
+        //     title: "Logout",
+        //     href: "/admin/logout",
+        //     icon: LogOut,
+        // },
     ];
 
     const getDefaultOpenMenus = () => {
