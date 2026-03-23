@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
-const SideBar = () => {
+const SideBar = ({ open, setOpen }) => {
     const pathname = usePathname();
 
     const adminSidebar = [
@@ -88,7 +88,18 @@ const SideBar = () => {
     };
 
     return (
-        <aside className="w-[270px] min-h-screen bg-[#f8f8f8] border-r border-gray-200 p-4">
+<>
+        {open && (
+            <div
+                className="fixed inset-0 bg-black/30 z-40 md:hidden"
+                onClick={() => setOpen(false)}
+            />
+        )}
+
+        <aside
+            className={`fixed md:static top-0 left-0 z-50 h-full w-[270px] bg-[#f8f8f8] border-r border-gray-200 p-4 transform transition-transform duration-300
+        ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+        >
             <nav className="space-y-2">
                 {adminSidebar.map((item, index) => {
                     const Icon = item.icon;
@@ -146,6 +157,7 @@ const SideBar = () => {
                                                         >
                                                             <Link
                                                                 href={child.href}
+                                                                onClick={() => setOpen(false)}
                                                                 className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all duration-200 ${
                                                                     childActive
                                                                         ? "bg-white text-gray-900 font-semibold shadow-sm"
@@ -169,6 +181,7 @@ const SideBar = () => {
                         <Link
                             key={index}
                             href={item.href}
+                            onClick={() => setOpen(false)}
                             className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 ${
                                 linkActive
                                     ? "bg-gray-200 text-gray-900 font-semibold"
@@ -182,6 +195,7 @@ const SideBar = () => {
                 })}
             </nav>
         </aside>
+</>
     );
 };
 

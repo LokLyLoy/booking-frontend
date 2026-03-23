@@ -4,18 +4,26 @@ import React, {useState} from 'react';
 import Image from "next/image";
 import Link from "next/link";
 import { Inter } from 'next/font/google';
-import { UserCircle, LogOut } from "lucide-react";
+import { UserCircle, LogOut, Menu } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const inter = Inter({
     subsets: ['latin'],
 });
 
-const TopBar = () => {
+const TopBar = ({ onMenuClick }) => {
     const [dropDown, setDropDown] = useState(false);
 
     return (
         <div className="w-full flex justify-between items-center">
+
+            {/* Mobile Menu Button */}
+            <button
+                onClick={onMenuClick}
+                className="md:hidden"
+            >
+                <Menu className="w-6 h-6 text-black" />
+            </button>
 
             {/* Logo */}
             <Link href="/admin/dashboard" className="flex items-center gap-3">
@@ -25,7 +33,8 @@ const TopBar = () => {
                     width={40}
                     height={40}
                 />
-                <div className={`${inter.className} font-bold text-lg text-black tracking-tight`}>
+
+                <div className="hidden md:block font-bold text-lg text-black tracking-tight">
                     PnV Skin Care Center
                 </div>
             </Link>
