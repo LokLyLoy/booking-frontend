@@ -1,74 +1,79 @@
-'use client'
+"use client";
 
-import React, {useState} from 'react';
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Inter } from 'next/font/google';
+import { Inter } from "next/font/google";
 import { UserCircle, LogOut, Menu } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const inter = Inter({
-    subsets: ['latin'],
+    subsets: ["latin"],
 });
 
 const TopBar = ({ onMenuClick }) => {
     const [dropDown, setDropDown] = useState(false);
 
     return (
-        <div className="w-full flex justify-between items-center">
+        <header className="w-full flex items-center justify-between px-4 md:px-6 h-14 border-black/10 bg-white">
 
-            {/* Mobile Menu Button */}
-            <button
-                onClick={onMenuClick}
-                className="md:hidden"
-            >
-                <Menu className="w-6 h-6 text-black" />
-            </button>
+            {/* LEFT */}
+            <div className="flex items-center gap-3">
+                {/* Mobile menu */}
+                <button
+                    onClick={onMenuClick}
+                    className="md:hidden p-1.5 rounded-md hover:bg-black/5 transition"
+                >
+                    <Menu className="w-5 h-5 text-black" />
+                </button>
 
-            {/* Logo */}
-            <Link href="/admin/dashboard" className="flex items-center gap-3">
-                <Image
-                    src="/images/logo.png"
-                    alt="logo"
-                    width={40}
-                    height={40}
-                />
+                {/* Logo */}
+                <Link href="/admin/dashboard" className="flex items-center gap-3">
+                    <Image
+                        src="/images/logo.png"
+                        alt="logo"
+                        width={40}
+                        height={40}
+                        className="rounded-md"
+                    />
 
-                <div className="hidden md:block font-bold text-lg text-black tracking-tight">
-                    PnV Skin Care Center
-                </div>
-            </Link>
+                    <span className="hidden md:block text-lg font-bold text-black tracking-tight">
+                        PnV Skin Care Center
+                    </span>
+                </Link>
+            </div>
 
-            {/* Profile */}
+            {/* RIGHT */}
             <div className="relative">
-
-                <div
-                    className="flex items-center gap-1.5 cursor-pointer"
+                <button
                     onClick={() => setDropDown(!dropDown)}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-black/5 transition"
                 >
                     <UserCircle className="w-5 h-5 text-black" />
-                    <span className="text-sm text-black/70">Profile</span>
-                </div>
+                    <span className="hidden md:block text-sm text-gray-600">
+                        Profile
+                    </span>
+                </button>
 
                 <AnimatePresence>
                     {dropDown && (
                         <motion.div
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                            className="absolute right-0 mt-2 w-36 bg-white border border-gray-200 rounded-lg shadow-md overflow-hidden"
+                            initial={{ opacity: 0, y: -6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.18 }}
+                            className="absolute right-0 mt-2 w-40 bg-white border border-black/10 rounded-lg p-1"
                         >
                             <Link
                                 href="/admin/profile"
-                                className="flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                className="flex items-center gap-2 px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-black/5 hover:text-black transition"
                             >
                                 <UserCircle className="w-4 h-4" />
                                 Profile
                             </Link>
 
                             <button
-                                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+                                className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-black/5 hover:text-black transition"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Logout
@@ -76,9 +81,8 @@ const TopBar = ({ onMenuClick }) => {
                         </motion.div>
                     )}
                 </AnimatePresence>
-
             </div>
-        </div>
+        </header>
     );
 };
 

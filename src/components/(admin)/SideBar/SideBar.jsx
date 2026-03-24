@@ -7,11 +7,7 @@ import {
     LayoutDashboard,
     CalendarDays,
     BookOpen,
-    Users,
-    UserCircle,
-    LogOut,
     ChevronDown,
-    ChevronRight,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -37,29 +33,11 @@ const SideBar = ({ open, setOpen }) => {
             icon: BookOpen,
             children: [
                 { title: "All Bookings", href: "/admin/bookings" },
-                { title: "Pending Bookings", href: "/admin/bookings/pending" },
-                { title: "Confirmed Bookings", href: "/admin/bookings/confirmed" },
-                { title: "Cancelled Bookings", href: "/admin/bookings/cancelled" },
+                { title: "Pending", href: "/admin/bookings/pending" },
+                { title: "Confirmed", href: "/admin/bookings/confirmed" },
+                { title: "Cancelled", href: "/admin/bookings/cancelled" },
             ],
         },
-        // {
-        //     title: "Users",
-        //     icon: Users,
-        //     children: [
-        //         { title: "All Users", href: "/admin/users" },
-        //         { title: "Create User", href: "/admin/users/create" },
-        //     ],
-        // },
-        // {
-        //     title: "Profile",
-        //     href: "/admin/profile",
-        //     icon: UserCircle,
-        // },
-        // {
-        //     title: "Logout",
-        //     href: "/admin/logout",
-        //     icon: LogOut,
-        // },
     ];
 
     const getDefaultOpenMenus = () => {
@@ -88,114 +66,118 @@ const SideBar = ({ open, setOpen }) => {
     };
 
     return (
-<>
-        {open && (
-            <div
-                className="fixed inset-0 bg-black/30 z-40 md:hidden"
-                onClick={() => setOpen(false)}
-            />
-        )}
+        <>
+            {open && (
+                <div
+                    className="fixed inset-0 bg-black/20 z-40 md:hidden"
+                    onClick={() => setOpen(false)}
+                />
+            )}
 
-        <aside
-            className={`fixed md:static top-0 left-0 z-50 h-full w-[270px] bg-[#f8f8f8] border-r border-gray-200 p-4 transform transition-transform duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
-        >
-            <nav className="space-y-2">
-                {adminSidebar.map((item, index) => {
-                    const Icon = item.icon;
-                    const hasChildren = !!item.children;
-                    const parentActive = hasChildren && isParentActive(item.children);
-                    const linkActive = item.href && pathname === item.href;
+            <aside
+                className={`fixed md:static top-0 left-0 z-50 h-full w-[260px] bg-white border-r border-black/10 p-3 transition-transform duration-300
+                ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0`}
+            >
+                <nav className="space-y-1">
+                    {adminSidebar.map((item, index) => {
+                        const Icon = item.icon;
+                        const hasChildren = !!item.children;
+                        const parentActive =
+                            hasChildren && isParentActive(item.children);
+                        const linkActive = pathname === item.href;
 
-                    if (hasChildren) {
-                        return (
-                            <div key={index} className="rounded-2xl overflow-hidden">
-                                <button
-                                    onClick={() => toggleMenu(item.title)}
-                                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl transition-all duration-200 ${
-                                        parentActive
-                                            ? "bg-gray-200 text-gray-900 font-semibold"
-                                            : "text-gray-600 hover:bg-gray-100"
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Icon size={18} className="shrink-0" />
-                                        <span className="text-sm">{item.title}</span>
-                                    </div>
-
-                                    <motion.div
-                                        animate={{ rotate: openMenus[item.title] ? 180 : 0 }}
-                                        transition={{ duration: 0.25 }}
+                        if (hasChildren) {
+                            return (
+                                <div key={index}>
+                                    <button
+                                        onClick={() => toggleMenu(item.title)}
+                                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition
+                                        ${
+                                            parentActive
+                                                ? "bg-black/5 text-black font-medium"
+                                                : "text-gray-500 hover:bg-black/5 hover:text-black"
+                                        }`}
                                     >
-                                        <ChevronDown size={18} />
-                                    </motion.div>
-                                </button>
+                                        <div className="flex items-center gap-3">
+                                            <Icon size={18} />
+                                            {item.title}
+                                        </div>
 
-                                <AnimatePresence initial={false}>
-                                    {openMenus[item.title] && (
                                         <motion.div
-                                            initial={{ height: 0, opacity: 0 }}
-                                            animate={{ height: "auto", opacity: 1 }}
-                                            exit={{ height: 0, opacity: 0 }}
-                                            transition={{ duration: 0.3, ease: "easeInOut" }}
-                                            className="overflow-hidden"
+                                            animate={{
+                                                rotate: openMenus[item.title]
+                                                    ? 180
+                                                    : 0,
+                                            }}
+                                            transition={{ duration: 0.2 }}
                                         >
-                                            <div className="ml-6 mt-2 border-l border-gray-200 pl-4 space-y-1 pb-1">
-                                                {item.children.map((child, childIndex) => {
-                                                    const childActive = pathname === child.href;
+                                            <ChevronDown size={16} />
+                                        </motion.div>
+                                    </button>
 
-                                                    return (
-                                                        <motion.div
-                                                            key={childIndex}
-                                                            initial={{ x: -8, opacity: 0 }}
-                                                            animate={{ x: 0, opacity: 1 }}
-                                                            exit={{ x: -8, opacity: 0 }}
-                                                            transition={{
-                                                                duration: 0.2,
-                                                                delay: childIndex * 0.04,
-                                                            }}
-                                                        >
+                                    <AnimatePresence>
+                                        {openMenus[item.title] && (
+                                            <motion.div
+                                                initial={{ opacity: 0, height: 0 }}
+                                                animate={{
+                                                    opacity: 1,
+                                                    height: "auto",
+                                                }}
+                                                exit={{ opacity: 0, height: 0 }}
+                                                transition={{ duration: 0.2 }}
+                                                className="ml-6 mt-1 space-y-1"
+                                            >
+                                                {item.children.map(
+                                                    (child, childIndex) => {
+                                                        const childActive =
+                                                            pathname === child.href;
+
+                                                        return (
                                                             <Link
+                                                                key={childIndex}
                                                                 href={child.href}
-                                                                onClick={() => setOpen(false)}
-                                                                className={`flex items-center justify-between px-3 py-2 rounded-xl text-sm transition-all duration-200 ${
+                                                                onClick={() =>
+                                                                    setOpen(false)
+                                                                }
+                                                                className={`block px-3 py-1.5 rounded-md text-sm transition
+                                                                ${
                                                                     childActive
-                                                                        ? "bg-white text-gray-900 font-semibold shadow-sm"
-                                                                        : "text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                                                                        ? "bg-black/10 text-black font-medium"
+                                                                        : "text-gray-500 hover:text-black hover:bg-black/5"
                                                                 }`}
                                                             >
-                                                                <span>{child.title}</span>
+                                                                {child.title}
                                                             </Link>
-                                                        </motion.div>
-                                                    );
-                                                })}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-                            </div>
-                        );
-                    }
+                                                        );
+                                                    }
+                                                )}
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            );
+                        }
 
-                    return (
-                        <Link
-                            key={index}
-                            href={item.href}
-                            onClick={() => setOpen(false)}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 ${
-                                linkActive
-                                    ? "bg-gray-200 text-gray-900 font-semibold"
-                                    : "text-gray-600 hover:bg-gray-100"
-                            }`}
-                        >
-                            <Icon size={18} className="shrink-0" />
-                            <span className="text-sm">{item.title}</span>
-                        </Link>
-                    );
-                })}
-            </nav>
-        </aside>
-</>
+                        return (
+                            <Link
+                                key={index}
+                                href={item.href}
+                                onClick={() => setOpen(false)}
+                                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition
+                                ${
+                                    linkActive
+                                        ? "bg-black/5 text-black font-medium"
+                                        : "text-gray-500 hover:bg-black/5 hover:text-black"
+                                }`}
+                            >
+                                <Icon size={18} />
+                                {item.title}
+                            </Link>
+                        );
+                    })}
+                </nav>
+            </aside>
+        </>
     );
 };
 

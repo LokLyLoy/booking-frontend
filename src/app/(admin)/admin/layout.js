@@ -8,24 +8,23 @@ export default function AdminLayout({ children }) {
     const [openSidebar, setOpenSidebar] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="h-screen flex flex-col overflow-hidden bg-gray-100">
 
-            {/* Topbar (NOW visible on mobile) */}
-            <header className="flex h-16 bg-white items-center px-4 md:px-6 border-b border-gray-200">
+            <header className="sticky top-0 flex h-16 bg-white items-center px-4 md:px-6 border-b border-gray-200">
                 <TopBar onMenuClick={() => setOpenSidebar(true)} />
             </header>
 
-            <main className="flex">
+            <div className="flex flex-1 overflow-hidden">
 
-                {/* Sidebar */}
-                <SideBar open={openSidebar} setOpen={setOpenSidebar} />
+                <div className="h-full overflow-y-auto">
+                    <SideBar open={openSidebar} setOpen={setOpenSidebar} />
+                </div>
 
-                {/* Content */}
-                <section className="flex-1 p-4 md:p-6 overflow-y-auto">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6">
                     {children}
-                </section>
+                </main>
 
-            </main>
+            </div>
         </div>
     );
 }
