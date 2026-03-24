@@ -5,7 +5,9 @@ import {
     BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
 } from 'recharts';
-import { Users, Calendar, BookOpen, TrendingUp } from 'lucide-react';
+import { Users, Calendar, BookOpen, TrendingUp} from 'lucide-react';
+import { authAxios } from "@/lib/auth";
+import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
     const [stats, setStats] = useState({
@@ -20,6 +22,7 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const router = useRouter();
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
     useEffect(() => {
@@ -30,17 +33,14 @@ const Dashboard = () => {
         try {
             setLoading(true);
 
-            const usersRes = await fetch(`${API_BASE_URL}/api/users/list`);
-            const usersData = usersRes.ok ? await usersRes.json() : [];
+            // Users
+            const usersRes = await authAxios.get(`${API_BASE_URL}/api/users/list`);
+            const usersData = usersRes?.data || [];
             setUsers(usersData);
 
-            const appointmentsRes = await fetch(`${API_BASE_URL}/api/admin/appointments/list`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-                }
-            });
-
-            const appointmentsData = appointmentsRes.ok ? await appointmentsRes.json() : [];
+            // Appointments
+            const appointmentsRes = await authAxios.get(`${API_BASE_URL}/api/admin/appointments/list`);
+            const appointmentsData = appointmentsRes?.data || [];
             setAppointments(appointmentsData);
 
             setStats({
@@ -58,6 +58,7 @@ const Dashboard = () => {
         }
     };
 
+
     const appointmentChartData = appointments.map(apt => ({
         date: apt.date,
         booked: apt.booked_count,
@@ -65,16 +66,8 @@ const Dashboard = () => {
     }));
 
     const statusDistribution = [
-        {
-            name: 'Open',
-            value: appointments.filter(a => a.status === 'open').length,
-            color: '#111827'
-        },
-        {
-            name: 'Closed',
-            value: appointments.filter(a => a.status === 'closed').length,
-            color: '#d1d5db'
-        }
+        { name: 'Open', value: appointments.filter(a => a.status === 'open').length, color: '#111827' },
+        { name: 'Closed', value: appointments.filter(a => a.status === 'closed').length, color: '#d1d5db' }
     ];
 
     const StatCard = ({ icon: Icon, title, value }) => (
@@ -98,12 +91,14 @@ const Dashboard = () => {
     }
 
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen px-6 py-4">
 
             {/* Header */}
-            <div className="mb-6">
-                <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
-                <p className="text-gray-500 text-sm">Booking system overview</p>
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
+                    <p className="text-gray-500 text-sm">Booking system overview</p>
+                </div>
             </div>
 
             {error && (
@@ -122,7 +117,6 @@ const Dashboard = () => {
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-
                 {/* Bar Chart */}
                 <div className="bg-white border border-gray-200 rounded-xl p-5">
                     <h2 className="text-sm font-medium text-gray-700 mb-4">Capacity</h2>
@@ -171,7 +165,6 @@ const Dashboard = () => {
             {/* Users Table */}
             <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
                 <h2 className="text-sm font-medium text-gray-700 mb-4">Recent Users</h2>
-
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="border-b border-gray-200 text-gray-500 text-xs uppercase">
@@ -197,7 +190,6 @@ const Dashboard = () => {
             {/* Appointments Table */}
             <div className="bg-white border border-gray-200 rounded-xl p-5">
                 <h2 className="text-sm font-medium text-gray-700 mb-4">Appointments</h2>
-
                 <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                         <thead className="border-b border-gray-200 text-gray-500 text-xs uppercase">

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React, { useState } from "react";
 import Image from "next/image";
@@ -6,6 +6,8 @@ import Link from "next/link";
 import { Inter } from "next/font/google";
 import { UserCircle, LogOut, Menu } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie"; // <- Import js-cookie
 
 const inter = Inter({
     subsets: ["latin"],
@@ -13,6 +15,15 @@ const inter = Inter({
 
 const TopBar = ({ onMenuClick }) => {
     const [dropDown, setDropDown] = useState(false);
+    const router = useRouter();
+
+    const handleLogout = () => {
+        // Remove the access_token cookie
+        Cookies.remove("access_token", { path: "/" });
+
+        // Redirect to login page
+        router.push("/login");
+    };
 
     return (
         <header className="w-full flex items-center justify-between px-4 md:px-6 h-14 border-black/10 bg-white">
@@ -36,7 +47,6 @@ const TopBar = ({ onMenuClick }) => {
                         height={40}
                         className="rounded-md"
                     />
-
                     <span className="hidden md:block text-lg font-bold text-black tracking-tight">
                         PnV Skin Care Center
                     </span>
@@ -50,9 +60,7 @@ const TopBar = ({ onMenuClick }) => {
                     className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-black/5 transition"
                 >
                     <UserCircle className="w-5 h-5 text-black" />
-                    <span className="hidden md:block text-sm text-gray-600">
-                        Profile
-                    </span>
+                    <span className="hidden md:block text-sm text-gray-600">Profile</span>
                 </button>
 
                 <AnimatePresence>
@@ -72,7 +80,9 @@ const TopBar = ({ onMenuClick }) => {
                                 Profile
                             </Link>
 
+                            {/* Logout Button */}
                             <button
+                                onClick={handleLogout}
                                 className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-black/5 hover:text-black transition"
                             >
                                 <LogOut className="w-4 h-4" />
