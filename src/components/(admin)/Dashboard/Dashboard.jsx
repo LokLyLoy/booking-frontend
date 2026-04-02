@@ -10,6 +10,8 @@ import { authAxios } from "@/lib/auth";
 import { useRouter } from 'next/navigation';
 
 const Dashboard = () => {
+    const ITEMS_PER_PAGE = 5;
+    const [currentPage, setCurrentPage] = useState(1);
     const [stats, setStats] = useState({
         totalUsers: 0,
         totalAppointments: 0,
@@ -57,6 +59,45 @@ const Dashboard = () => {
             setLoading(false);
         }
     };
+
+    const getUserTime = (user) =>
+        user.createdAt ||
+        user.created_at ||
+        user.time ||
+        user.updatedAt ||
+        user.updated_at ||
+        '';
+
+    const formatTime = (value) => {
+        if (!value) return '-';
+
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return value;
+
+        return date.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
+    const sortedUsers = [...users].sort((a, b) => {
+        const aTime = new Date(getUserTime(a) || 0).getTime();
+        const bTime = new Date(getUserTime(b) || 0).getTime();
+        return bTime - aTime;
+    });
+
+    const totalPages = Math.max(1, Math.ceil(sortedUsers.length / ITEMS_PER_PAGE));
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const paginatedUsers = sortedUsers.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+    useEffect(() => {
+        if (currentPage > totalPages) {
+            setCurrentPage(totalPages);
+        }
+    }, [currentPage, totalPages]);
 
 
     const appointmentChartData = appointments.map(apt => ({
@@ -163,27 +204,98 @@ const Dashboard = () => {
             </div>
 
             {/* Users Table */}
-            <div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">
-                <h2 className="text-sm font-medium text-gray-700 mb-4">Recent Users</h2>
+            {/*<div className="bg-white border border-gray-200 rounded-xl p-5 mb-6">*/}
+            {/*    <h2 className="text-sm font-medium text-gray-700 mb-4">Recent Users</h2>*/}
+            {/*    <div className="overflow-x-auto">*/}
+            {/*        <table className="w-full text-sm">*/}
+            {/*            <thead className="border-b border-gray-200 text-gray-500 text-xs uppercase">*/}
+            {/*            <tr>*/}
+            {/*                <th className="px-4 py-3 text-left">ID</th>*/}
+            {/*                <th className="px-4 py-3 text-left">Username</th>*/}
+            {/*                <th className="px-4 py-3 text-left">Email</th>*/}
+            {/*            </tr>*/}
+            {/*            </thead>*/}
+            {/*            <tbody>*/}
+            {/*            {users.slice(0, 5).map(user => (*/}
+            {/*                <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">*/}
+            {/*                    <td className="px-4 py-3">{user.id}</td>*/}
+            {/*                    <td className="px-4 py-3 text-gray-900">{user.username}</td>*/}
+            {/*                    <td className="px-4 py-3 text-gray-600">{user.email}</td>*/}
+            {/*                </tr>*/}
+            {/*            ))}*/}
+            {/*            </tbody>*/}
+            {/*        </table>*/}
+            {/*    </div>*/}
+            {/*</div>*/}
+
+            {/*table*/}
+            <div className="mb-6 border border-black/10 bg-white">
+                <div className="border-b border-black/10 px-4 py-3">
+                    <h2 className="text-sm font-medium text-black">Recent Users</h2>
+                </div>
+
                 <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="border-b border-gray-200 text-gray-500 text-xs uppercase">
+                    <table className="w-full text-sm text-black">
+                        <thead className="border-b border-black/10 text-xs uppercase text-black/50">
                         <tr>
-                            <th className="px-4 py-3 text-left">ID</th>
-                            <th className="px-4 py-3 text-left">Username</th>
-                            <th className="px-4 py-3 text-left">Email</th>
+                            <th className="px-4 py-3 text-left font-medium">ID</th>
+                            <th className="px-4 py-3 text-left font-medium">Username</th>
+                            <th className="px-4 py-3 text-left font-medium">Email</th>
+                            <th className="px-4 py-3 text-left font-medium">Time</th>
                         </tr>
                         </thead>
+
                         <tbody>
-                        {users.slice(0, 5).map(user => (
-                            <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
-                                <td className="px-4 py-3">{user.id}</td>
-                                <td className="px-4 py-3 text-gray-900">{user.username}</td>
-                                <td className="px-4 py-3 text-gray-600">{user.email}</td>
+                        {paginatedUsers.length > 0 ? (
+                            paginatedUsers.map((user) => (
+                                <tr key={user.id} className="border-b border-black/10 last:border-b-0">
+                                    <td className="px-4 py-3">{user.id}</td>
+                                    <td className="px-4 py-3">{user.username}</td>
+                                    <td className="px-4 py-3">{user.email}</td>
+                                    <td className="px-4 py-3 text-black/70">
+                                        {formatTime(getUserTime(user))}
+                                    </td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr>
+                                <td colSpan={4} className="px-4 py-6 text-center text-black/50">
+                                    No users found
+                                </td>
                             </tr>
-                        ))}
+                        )}
                         </tbody>
                     </table>
+                </div>
+
+                <div className="flex items-center justify-between border-t border-black/10 px-4 py-3 text-sm">
+        <span className="text-black/60">
+            {sortedUsers.length === 0
+                ? '0 users'
+                : `${startIndex + 1}-${Math.min(startIndex + paginatedUsers.length, sortedUsers.length)} of ${sortedUsers.length}`}
+        </span>
+
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="border border-black/10 px-3 py-1.5 text-black disabled:opacity-40"
+                        >
+                            Prev
+                        </button>
+
+                        <span className="min-w-[80px] text-center text-black/60">
+                Page {currentPage} / {totalPages}
+            </span>
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="border border-black/10 px-3 py-1.5 text-black disabled:opacity-40"
+                        >
+                            Next
+                        </button>
+                    </div>
                 </div>
             </div>
 

@@ -9,9 +9,14 @@ export function middleware(req) {
         return NextResponse.redirect(url);
     }
 
+    if (token && url.pathname === "/login") {
+        url.pathname = "/admin/dashboard";
+        return NextResponse.redirect(url);
+    }
+
     return NextResponse.next();
 }
 
 export const config = {
-    matcher: ["/admin/:path*"], // protect all dashboard routes
+    matcher: ["/admin/:path*", "/login"], // protect all dashboard routes
 };
