@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, RefreshCw, ChevronLeft, ChevronRight, Eye, Trash2, AlertTriangle, X, SquarePen } from 'lucide-react';
+import { Search, Plus, RefreshCw, ChevronLeft, ChevronRight, Eye, Trash2, AlertTriangle, X, SquarePen, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { authAxios } from "@/lib/auth";
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -18,6 +18,7 @@ const Appointments = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editFormData, setEditFormData] = useState(null);
     const [isUpdating, setIsUpdating] = useState(false);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: null });
     const itemsPerPage = 8;
 
     const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -120,9 +121,45 @@ const Appointments = () => {
         apt.start_time.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const totalPages = Math.ceil(filteredAppointments.length / itemsPerPage);
+    const handleSort = (key) => {
+        setSortConfig(prev => {
+            if (prev.key !== key) return { key, direction: 'asc' };
+            if (prev.direction === 'asc') return { key, direction: 'desc' };
+            if (prev.direction === 'desc') return { key: null, direction: null };
+            return { key, direction: 'asc' };
+        });
+        setCurrentPage(1);
+    };
+
+    const sortedAppointments = [...filteredAppointments].sort((a, b) => {
+        if (!sortConfig.key || !sortConfig.direction) return 0;
+        let aVal, bVal;
+        switch (sortConfig.key) {
+            case 'date':
+                // Convert DD-MM-YYYY to comparable string YYYY-MM-DD
+                aVal = a.date.split('-').reverse().join('-');
+                bVal = b.date.split('-').reverse().join('-');
+                break;
+            case 'start_time': aVal = a.start_time; bVal = b.start_time; break;
+            case 'max_capacity': aVal = a.max_capacity; bVal = b.max_capacity; break;
+            case 'booked_count': aVal = a.booked_count; bVal = b.booked_count; break;
+            case 'status': aVal = a.status; bVal = b.status; break;
+            default: return 0;
+        }
+        if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const SortIcon = ({ col }) => {
+        if (sortConfig.key !== col) return <ChevronsUpDown size={14} className="ml-1 opacity-40" />;
+        if (sortConfig.direction === 'asc') return <ChevronUp size={14} className="ml-1 text-gray-700" />;
+        return <ChevronDown size={14} className="ml-1 text-gray-700" />;
+    };
+
+    const totalPages = Math.ceil(sortedAppointments.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const currentData = filteredAppointments.slice(startIndex, startIndex + itemsPerPage);
+    const currentData = sortedAppointments.slice(startIndex, startIndex + itemsPerPage);
 
     return (
         <div className="px-6 py-4">
@@ -166,11 +203,17 @@ const Appointments = () => {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-gray-50/50 border-b border-gray-200">
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Date</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Time</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Capacity</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Booked</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                {[{ label: 'Date', key: 'date' }, { label: 'Time', key: 'start_time' }, { label: 'Capacity', key: 'max_capacity' }, { label: 'Booked', key: 'booked_count' }, { label: 'Status', key: 'status' }].map(({ label, key }) => (
+                                    <th
+                                        key={key}
+                                        onClick={() => handleSort(key)}
+                                        className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:bg-gray-100 transition-colors"
+                                    >
+                                        <span className="inline-flex items-center">
+                                            {label}<SortIcon col={key} />
+                                        </span>
+                                    </th>
+                                ))}
                                 <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
                             </tr>
                         </thead>
@@ -245,25 +288,32 @@ const Appointments = () => {
                 </div>
 
                 {/* Pagination */}
-                <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between bg-white text-sm">
-                    <span className="text-gray-500">
-                        Showing {filteredAppointments.length === 0 ? 0 : startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredAppointments.length)} of {filteredAppointments.length}
+                <div className="flex items-center justify-between border-t border-black/10 px-6 py-4 text-sm bg-white">
+                    <span className="text-black/60">
+                        {sortedAppointments.length === 0
+                            ? '0 appointments'
+                            : `${startIndex + 1}-${Math.min(startIndex + currentData.length, sortedAppointments.length)} of ${sortedAppointments.length}`}
                     </span>
+
                     <div className="flex items-center gap-2">
-                        <button 
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors bg-white shadow-sm"
+                            className="border border-black/10 px-3 py-1.5 text-black disabled:opacity-40 hover:bg-gray-50 transition-colors"
                         >
-                            <ChevronLeft size={16} />
+                            Prev
                         </button>
-                        <span className="px-3 py-1 font-medium bg-gray-50 rounded-md border border-gray-100">{currentPage} / {totalPages || 1}</span>
-                        <button 
+
+                        <span className="min-w-[80px] text-center text-black/60">
+                            Page {currentPage} / {totalPages || 1}
+                        </span>
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages || 1))}
                             disabled={currentPage === totalPages || totalPages === 0}
-                            onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                            className="p-1.5 rounded-lg border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors bg-white shadow-sm"
+                            className="border border-black/10 px-3 py-1.5 text-black disabled:opacity-40 hover:bg-gray-50 transition-colors"
                         >
-                            <ChevronRight size={16} />
+                            Next
                         </button>
                     </div>
                 </div>
