@@ -1,98 +1,107 @@
 'use client'
 
 import React, { useState } from 'react';
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 import { login } from "@/lib/auth";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 const LoginPage = () => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [isFocused, setIsFocused] = useState({ username: false, password: false });
+    const [isLoading, setIsLoading] = useState(false);
 
     const router = useRouter();
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const success = await login(username, password);
-        if (success) {
-            router.push("/admin/dashboard");
-        } else {
-            alert("Invalid username or password");
+        setIsLoading(true);
+        try {
+            const success = await login(username, password);
+            if (success) {
+                router.push("/admin/dashboard");
+            } else {
+                alert("Invalid username or password");
+            }
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-white">
-            <div className="w-full max-w-md px-8 py-12">
-                {/* Minimalist Logo/Brand */}
-                <div className="text-center mb-12">
-                    <h1 className="text-3xl font-light tracking-tight text-black">
+        <div className="min-h-screen flex items-center justify-center bg-[#ffffff] text-[#000000] font-sans">
+            <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+                className="w-full max-w-[400px] px-6 py-10"
+            >
+                {/* Logo/Icon Area */}
+                <div className="flex justify-center mb-5">
+                    <div className="w-12 h-12 flex items-center justify-center text-white">
+                         <Image 
+                            src="/images/logo.png"
+                            alt="logo"
+                            width={100}
+                            height={100}
+                        />
+                    </div>
+                </div>
+
+                <div className="text-center mb-5">
+                    <h1 className="text-[32px] font-bold tracking-tight mb-2">
                         Welcome back
                     </h1>
-                    <p className="text-gray-400 text-sm mt-2 font-light">
-                        Sign in to continue
+                    <p className="text-[#6e6e73] text-sm">
+                        Please enter your details to sign in.
                     </p>
                 </div>
 
-                {/* Login Form */}
-                <form onSubmit={handleSubmit} className="space-y-8">
-                    <div className="relative">
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium mb-1.5 ml-1 text-[#1d1d1f]">
+                            Username
+                        </label>
                         <input
                             type="text"
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
-                            onFocus={() => setIsFocused({ ...isFocused, username: true })}
-                            onBlur={() => setIsFocused({ ...isFocused, username: false })}
-                            className="w-full px-0 py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-black text-black text-lg transition-colors peer"
-                            placeholder=" "
+                            className="w-full h-12 px-4 bg-white border border-[#d2d2d7] rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-base"
+                            placeholder="Enter your username"
                             required
                         />
-                        <label className={`absolute left-0 transition-all duration-300 pointer-events-none ${
-                            isFocused.username || username
-                                ? '-top-3 text-xs text-gray-400'
-                                : 'top-3 text-gray-400 text-lg'
-                        }`}>
-                            Username
-                        </label>
                     </div>
 
-                    <div className="relative">
+                    <div>
+                        <div className="flex justify-between items-center mb-1.5 ml-1">
+                            <label className="block text-sm font-medium text-[#1d1d1f]">
+                                Password
+                            </label>
+                        </div>
                         <input
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            onFocus={() => setIsFocused({ ...isFocused, password: true })}
-                            onBlur={() => setIsFocused({ ...isFocused, password: false })}
-                            className="w-full px-0 py-3 bg-transparent border-b border-gray-200 focus:outline-none focus:border-black text-black text-lg transition-colors peer"
-                            placeholder=" "
+                            className="w-full h-12 px-4 bg-white border border-[#d2d2d7] rounded-xl focus:outline-none focus:ring-2 focus:ring-black/5 focus:border-black transition-all text-base"
+                            placeholder="••••••••"
                             required
                         />
-                        <label className={`absolute left-0 transition-all duration-300 pointer-events-none ${
-                            isFocused.password || password
-                                ? '-top-3 text-xs text-gray-400'
-                                : 'top-3 text-gray-400 text-lg'
-                        }`}>
-                            Password
-                        </label>
                     </div>
 
-                    <div className="flex items-center justify-between text-sm">
-                        <label className="flex items-center cursor-pointer">
-                            <input type="checkbox" className="w-4 h-4 border-gray-300 rounded focus:ring-black" />
-                            <span className="ml-2 text-gray-500 font-light">Remember me</span>
-                        </label>
-                        <a href="#" className="text-gray-400 hover:text-black transition-colors font-light">
-                            Forgot password?
-                        </a>
-                    </div>
 
                     <button
                         type="submit"
-                        className="w-full py-3 bg-black text-white font-light tracking-wide hover:bg-gray-800 transition-all duration-300 rounded-none"
+                        disabled={isLoading}
+                        className="cursor-pointer w-full h-12 bg-black text-white font-semibold rounded-xl hover:bg-[#1d1d1f] transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-2"
                     >
-                        Sign In
+                        {isLoading ? (
+                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            "Continue"
+                        )}
                     </button>
                 </form>
-            </div>
+            </motion.div>
         </div>
     );
 };

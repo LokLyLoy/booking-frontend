@@ -3,7 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import {
     BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+    AreaChart, Area, Legend
 } from 'recharts';
 import { Users, Calendar, BookOpen, TrendingUp} from 'lucide-react';
 import { authAxios } from "@/lib/auth";
@@ -107,9 +108,34 @@ const Dashboard = () => {
     }));
 
     const statusDistribution = [
-        { name: 'Open', value: appointments.filter(a => a.status === 'open').length, color: '#111827' },
-        { name: 'Closed', value: appointments.filter(a => a.status === 'closed').length, color: '#d1d5db' }
+        { name: 'Open', value: appointments.filter(a => a.status === 'open').length, color: '#6366f1' },
+        { name: 'Closed', value: appointments.filter(a => a.status === 'closed').length, color: '#94a3b8' }
     ];
+
+    const CustomTooltip = ({ active, payload, label }) => {
+        if (active && payload && payload.length) {
+            return (
+                <div className="bg-white/90 backdrop-blur-sm border border-gray-200 p-3 rounded-xl shadow-lg text-xs">
+                    <p className="font-bold text-gray-900 mb-2">{label}</p>
+                    <div className="space-y-1.5">
+                        {payload.map((entry, index) => (
+                            <div key={index} className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div 
+                                        className="w-2 h-2 rounded-full" 
+                                        style={{ backgroundColor: entry.color }}
+                                    />
+                                    <span className="text-gray-600 font-medium capitalize">{entry.name}</span>
+                                </div>
+                                <span className="font-bold text-gray-900">{entry.value}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
 
     const StatCard = ({ icon: Icon, title, value }) => (
         <div className="bg-white border border-gray-200 rounded-xl p-5 flex items-center justify-between hover:bg-gray-50 transition">
@@ -157,48 +183,136 @@ const Dashboard = () => {
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-                {/* Bar Chart */}
-                <div className="bg-white border border-gray-200 rounded-xl p-5">
-                    <h2 className="text-sm font-medium text-gray-700 mb-4">Capacity</h2>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                {/* Capacity Chart */}
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between mb-6">
+                        <div>
+                            <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Capacity Trend</h2>
+                            <p className="text-xs text-gray-500 mt-1">Booked vs Available slots</p>
+                        </div>
+                        <div className="flex items-center gap-4 text-xs font-medium">
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-indigo-600" />
+                                <span className="text-gray-600">Booked</span>
+                            </div>
+                            <div className="flex items-center gap-1.5">
+                                <div className="w-2 h-2 rounded-full bg-gray-300" />
+                                <span className="text-gray-600">Available</span>
+                            </div>
+                        </div>
+                    </div>
                     {appointmentChartData.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={260}>
-                            <BarChart data={appointmentChartData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                <XAxis dataKey="date" stroke="#6b7280" />
-                                <YAxis stroke="#6b7280" />
-                                <Tooltip />
-                                <Bar dataKey="booked" fill="#111827" />
-                                <Bar dataKey="available" fill="#9ca3af" />
-                            </BarChart>
-                        </ResponsiveContainer>
+                        <div className="h-[280px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={appointmentChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorBooked" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
+                                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                    <XAxis 
+                                        dataKey="date" 
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#94a3b8', fontSize: 11 }}
+                                        dy={10}
+                                    />
+                                    <YAxis 
+                                        axisLine={false}
+                                        tickLine={false}
+                                        tick={{ fill: '#94a3b8', fontSize: 11 }}
+                                    />
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Area 
+                                        type="monotone" 
+                                        dataKey="booked" 
+                                        stroke="#6366f1" 
+                                        strokeWidth={2.5}
+                                        fillOpacity={1} 
+                                        fill="url(#colorBooked)" 
+                                    />
+                                    <Area 
+                                        type="monotone" 
+                                        dataKey="available" 
+                                        stroke="#cbd5e1" 
+                                        strokeWidth={2}
+                                        fill="transparent" 
+                                    />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
                     ) : (
-                        <p className="text-gray-400 text-sm text-center py-10">No data</p>
+                        <div className="flex flex-col items-center justify-center h-[280px] text-gray-400">
+                            <TrendingUp size={32} className="mb-2 opacity-20" />
+                            <p className="text-sm">No trend data available</p>
+                        </div>
                     )}
                 </div>
 
-                {/* Pie Chart */}
-                <div className="bg-white border border-gray-200 rounded-xl p-5">
-                    <h2 className="text-sm font-medium text-gray-700 mb-4">Status</h2>
+                {/* Status Chart */}
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                    <div className="mb-6">
+                        <h2 className="text-sm font-semibold text-gray-900 uppercase tracking-wider">Status Distribution</h2>
+                        <p className="text-xs text-gray-500 mt-1">Allocation of appointment states</p>
+                    </div>
                     {statusDistribution.some(s => s.value > 0) ? (
-                        <ResponsiveContainer width="100%" height={260}>
-                            <PieChart>
-                                <Pie
-                                    data={statusDistribution}
-                                    dataKey="value"
-                                    cx="50%"
-                                    cy="50%"
-                                    outerRadius={80}
-                                >
-                                    {statusDistribution.map((entry, index) => (
-                                        <Cell key={index} fill={entry.color} />
-                                    ))}
-                                </Pie>
-                                <Tooltip />
-                            </PieChart>
-                        </ResponsiveContainer>
+                        <div className="h-[280px] w-full relative">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie
+                                        data={statusDistribution}
+                                        dataKey="value"
+                                        cx="50%"
+                                        cy="50%"
+                                        innerRadius={75}
+                                        outerRadius={95}
+                                        paddingAngle={5}
+                                        stroke="none"
+                                    >
+                                        {statusDistribution.map((entry, index) => (
+                                            <Cell key={index} fill={entry.color} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip content={<CustomTooltip />} />
+                                    <Legend 
+                                        verticalAlign="bottom" 
+                                        height={36}
+                                        content={({ payload }) => (
+                                            <div className="flex justify-center gap-6 mt-4">
+                                                {payload.map((entry, index) => (
+                                                    <div key={index} className="flex items-center gap-2">
+                                                        <div 
+                                                            className="w-2.5 h-2.5 rounded-sm" 
+                                                            style={{ backgroundColor: entry.color }}
+                                                        />
+                                                        <span className="text-xs font-semibold text-gray-700">
+                                                            {entry.value} ({statusDistribution.find(s => s.name === entry.value)?.value})
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+                                    />
+                                </PieChart>
+                            </ResponsiveContainer>
+                            {/* Center Text */}
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center pointer-events-none">
+                                <p className="text-2xl font-bold text-gray-900">
+                                    {statusDistribution.reduce((a, b) => a + b.value, 0)}
+                                </p>
+                                <p className="text-[10px] uppercase tracking-wider text-gray-500 font-medium">Total</p>
+                            </div>
+                        </div>
                     ) : (
-                        <p className="text-gray-400 text-sm text-center py-10">No data</p>
+                        <div className="flex flex-col items-center justify-center h-[280px] text-gray-400">
+                            <div className="w-12 h-12 rounded-full bg-gray-50 flex items-center justify-center mb-3">
+                                <PieChart size={24} className="opacity-20" />
+                            </div>
+                            <p className="text-sm">No distribution data</p>
+                        </div>
                     )}
                 </div>
             </div>
@@ -229,7 +343,7 @@ const Dashboard = () => {
             {/*</div>*/}
 
             {/*table*/}
-            <div className="mb-6 border border-black/10 bg-white">
+            <div className="mb-6 border border-black/10 bg-white rounded-xl">
                 <div className="border-b border-black/10 px-4 py-3">
                     <h2 className="text-sm font-medium text-black">Recent Users</h2>
                 </div>

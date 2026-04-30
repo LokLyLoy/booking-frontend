@@ -8,6 +8,7 @@ import {
     CalendarDays,
     BookOpen,
     ChevronDown,
+    SquareMenu,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
@@ -36,6 +37,16 @@ const SideBar = ({ open, setOpen }) => {
                 { title: "Pending", href: "/admin/bookings/pending" },
                 { title: "Confirmed", href: "/admin/bookings/confirmed" },
                 { title: "Cancelled", href: "/admin/bookings/cancelled" },
+            ],
+        },
+        {
+            title: "Menu",
+            icon: SquareMenu,
+            children: [
+                { title: "List Services", href: "/admin/menu/services/list" },
+                { title: "Add Services", href: "/admin/menu/services/create" },
+                { title: "List Categories", href: "/admin/menu/category/list" },
+                { title: "Add Categories", href: "/admin/menu/category/create" },
             ],
         },
     ];

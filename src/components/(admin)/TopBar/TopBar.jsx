@@ -7,7 +7,7 @@ import { Inter } from "next/font/google";
 import { UserCircle, LogOut, Menu } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import Cookies from "js-cookie"; // <- Import js-cookie
+import Cookies from "js-cookie";
 
 const inter = Inter({
     subsets: ["latin"],
@@ -57,7 +57,7 @@ const TopBar = ({ onMenuClick }) => {
             <div className="relative">
                 <button
                     onClick={() => setDropDown(!dropDown)}
-                    className="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-black/5 transition"
+                    className="cursor-pointer flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-black/5 transition"
                 >
                     <UserCircle className="w-5 h-5 text-black" />
                     <span className="hidden md:block text-sm text-gray-600">Profile</span>
@@ -83,7 +83,7 @@ const TopBar = ({ onMenuClick }) => {
                             {/* Logout Button */}
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-black/5 hover:text-black transition"
+                                className="cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-md text-sm text-gray-600 hover:bg-black/5 hover:text-black transition"
                             >
                                 <LogOut className="w-4 h-4" />
                                 Logout
